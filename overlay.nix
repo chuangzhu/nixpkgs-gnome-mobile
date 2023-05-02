@@ -1,17 +1,18 @@
-self: super:
-{
+self: super: {
   gnome = super.gnome.overrideScope' (gself: gsuper: {
     gnome-shell = gsuper.gnome-shell.overrideAttrs (old: {
-      version = "unstable-2023-04-03";
+      version = "unstable-2023-04-24";
       src = super.fetchFromGitLab {
         domain = "gitlab.gnome.org";
         owner = "verdre";
         repo = "gnome-shell";
-        rev = "7244a2d0ba30ff4927da14f2611db0dc777c668b";
-        hash = "sha256-4N2L/YsmjsgTGS990HnuFRKxiJKkF0duikT0nbN1w7E=";
+        rev = "034144c20f56039901969ae0ff3f9af0e3d79924";
+        hash = "sha256-LwFy3Nh4djWjWt7cogsVGk7OlgOPV3gvvRBD7UFTSf8=";
         fetchSubmodules = true;
       };
-      patches = super.lib.take (builtins.length old.patches - 1) old.patches;
+      patches = builtins.filter (p:
+        builtins.match ".*5766d4111ac065b37417bedcc1b998ab6bee5514.patch"
+        (toString p) == null) old.patches;
       # JS ERROR: Error: Requiring ModemManager, version none: Typelib file for namespace 'ModemManager' (any version) not found
       # @resource:///org/gnome/shell/misc/modemManager.js:4:49
       buildInputs = old.buildInputs ++ [ super.modemmanager ];
@@ -42,3 +43,4 @@ self: super:
     });
   });
 }
+
