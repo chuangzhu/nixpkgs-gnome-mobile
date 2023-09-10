@@ -11,8 +11,11 @@ self: super: {
         fetchSubmodules = true;
       };
       patches = builtins.filter (p:
-        builtins.match ".*5766d4111ac065b37417bedcc1b998ab6bee5514.patch"
-        (toString p) == null) old.patches;
+        (builtins.match ".*5766d4111ac065b37417bedcc1b998ab6bee5514.patch" (toString p) == null) &&
+        (builtins.match ".*fix-paths.patch" (toString p) == null)) old.patches ++ [ (super.fetchpatch {
+          url = "https://github.com/NixOS/nixpkgs/raw/b632011615d783dfb62712e5ba8a2eff35800d28/pkgs/desktops/gnome/core/gnome-shell/fix-paths.patch";
+          hash = "sha256-h5fcdXp2HUmlnxnQ6/56FpmvkxNYum+0i10rbN5XhTo=";
+        }) ];
       # JS ERROR: Error: Requiring ModemManager, version none: Typelib file for namespace 'ModemManager' (any version) not found
       # @resource:///org/gnome/shell/misc/modemManager.js:4:49
       buildInputs = old.buildInputs ++ [ super.modemmanager ];
