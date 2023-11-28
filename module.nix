@@ -16,20 +16,15 @@
     extraGSettingsOverridePackages = [ pkgs.gnome.mutter ];
   };
 
-  services.logind.extraConfig = ''
-    HandlePowerKey=ignore
-    HandlePowerKeyLongPress=poweroff
-  '';
+  services.logind.powerKey = "ignore";
+  services.logind.powerKeyLongPress = "poweroff";
 
   # Installed by default but not mobile friendly yet
   environment.gnome.excludePackages = with pkgs.gnome; [
-    pkgs.gnome-photos
     totem # Videos
     simple-scan # Document Scanner
     gnome-system-monitor
     yelp # Help
-    cheese
-    nautilus # Files
     gnome-music
     baobab # Disk Usage Analyser
     evince # Document Viewer
