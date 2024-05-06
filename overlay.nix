@@ -1,13 +1,13 @@
 self: super: {
   gnome = super.gnome.overrideScope (gself: gsuper: {
     gnome-shell = (gself.callPackage ./gnome-shell { }).overrideAttrs (old: {
-      version = "unstable-2023-09-08";
+      version = "unstable-2024-04-27";
       src = super.fetchFromGitLab {
         domain = "gitlab.gnome.org";
         owner = "verdre";
         repo = "mobile-shell";
-        rev = "df3f6b4c512d2f181e86ff7f6b1646ce7b907344";
-        hash = "sha256-s47z1q+MZWogT99OkzgQxKrqFT4I0yXyfGSww1IaaFs=";
+        rev = "3a352e95bf540d663f35554ee2de5dcd1ff408bc";
+        hash = "sha256-2FErBxN/WXnl7czNBM8OwVO2fIyu15vwgP6DGhLRBM4=";
         fetchSubmodules = true;
       };
       # JS ERROR: Error: Requiring ModemManager, version none: Typelib file for namespace 'ModemManager' (any version) not found
