@@ -1,6 +1,6 @@
 self: super: {
-  gnome = super.gnome.overrideScope' (gself: gsuper: {
-    gnome-shell = gsuper.gnome-shell.overrideAttrs (old: {
+  gnome = super.gnome.overrideScope (gself: gsuper: {
+    gnome-shell = (gself.callPackage ./gnome-shell { }).overrideAttrs (old: {
       version = "unstable-2023-09-08";
       src = super.fetchFromGitLab {
         domain = "gitlab.gnome.org";
@@ -28,7 +28,7 @@ self: super: {
       '';
     });
 
-    mutter = gsuper.mutter.overrideAttrs (old: {
+    mutter = (gself.callPackage ./mutter { }).overrideAttrs (old: {
       version = "unstable-2023-09-08";
       src = super.fetchFromGitLab {
         domain = "gitlab.gnome.org";
