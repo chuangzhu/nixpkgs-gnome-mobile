@@ -20,7 +20,7 @@
   services.logind.powerKeyLongPress = "poweroff";
 
   # Installed by default but not mobile friendly yet
-  environment.gnome.excludePackages = with pkgs.gnome; [
+  environment.gnome.excludePackages = with pkgs; with gnome; [
     totem # Videos
     simple-scan # Document Scanner
     gnome-system-monitor
@@ -28,8 +28,8 @@
     gnome-music
     baobab # Disk Usage Analyser
     evince # Document Viewer
-    pkgs.gnome-connections
-    pkgs.gnome-tour
+    gnome-connections
+    gnome-tour
   ];
 
   # Input method works, but these envvars must not be set, or the on-screen keyboard won't pop up.

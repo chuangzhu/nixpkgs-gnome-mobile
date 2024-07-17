@@ -21,7 +21,8 @@ This overlay targets the `nixos-unstable` channel. Please let me know if anythin
 Yes, only IBus works. You have to be careful not to set the `*_IM_MODULE` env vars (done in `./module.nix`), or the keyboard won't pop up. Example NixOS configuration:
 
 ```nix
-i18n.inputMethod.enabled = "ibus";
+i18n.inputMethod.enable = true;
+i18n.inputMethod.type = "ibus";
 i18n.inputMethod.ibus.engines = with pkgs.ibus-engines; [ libpinyin anthy ];
 ```
 
