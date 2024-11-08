@@ -11,7 +11,7 @@ let
 in
 
 {
-  gnome-shell = super.gnome-shell.overrideAttrs (old: rec {
+  gnome-shell = (super.callPackage ./nixpkgs/gn/gnome-shell/package.nix { }).overrideAttrs (old: rec {
     version = "46-mobile.1";
     src = super.fetchFromGitLab {
       domain = "gitlab.gnome.org";
@@ -30,7 +30,7 @@ in
     '';
   });
 
-  mutter = super.mutter.overrideAttrs (old: rec {
+  mutter = (super.callPackage ./nixpkgs/mu/mutter/package.nix { }).overrideAttrs (old: rec {
     version = "46-mobile.1";
     src = super.fetchFromGitLab {
       domain = "gitlab.gnome.org";
