@@ -21,12 +21,16 @@ in
       hash = "sha256-NL1/mddfaL1rMidsbtV4kG2SlAZZNuR8KmqTmEE4IAM=";
       fetchSubmodules = true;
     };
-    # JS ERROR: Error: Requiring ModemManager, version none: Typelib file for namespace 'ModemManager' (any version) not found
-    # @resource:///org/gnome/shell/misc/modemManager.js:4:49
-    buildInputs = old.buildInputs ++ [ super.modemmanager ];
     postPatch = ''
       patchShebangs src/data-to-c.pl
       ln -sf ${gvc} subprojects/gvc
+    '';
+    buildInputs = old.buildInputs ++ [
+      super.modemmanager # /org/gnome/shell/misc/modemManager.js
+      super.libgudev # /org/gnome/gjs/modules/esm/gi.js
+    ];
+    postFixup = old.postFixup + ''
+      wrapGApp $out/share/gnome-shell/org.gnome.Shell.SensorDaemon
     '';
   });
 
