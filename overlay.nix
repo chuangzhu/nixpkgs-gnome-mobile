@@ -43,6 +43,9 @@ in
       rev = version;
       hash = "sha256-Xmoq//Igaz1oVt2/aLV+9WjZzW1g6yLADqg97wD3Lug=";
     };
+    buildInputs = old.buildInputs ++ [
+      super.mesa-gl-headers # EGL/eglmesaext.h: No such file or directory
+    ];
   });
 }
 
