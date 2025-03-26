@@ -34,7 +34,7 @@ in
     '';
   });
 
-  mutter = ((super.callPackage ./nixpkgs/mu/mutter/package.nix { }).override { mesa = super.libgbm; }).overrideAttrs (old: rec {
+  mutter = (super.callPackage ./nixpkgs/mu/mutter/package.nix { mesa = super.libgbm; }).overrideAttrs (old: rec {
     version = "46-mobile.1";
     src = super.fetchFromGitLab {
       domain = "gitlab.gnome.org";
