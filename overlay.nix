@@ -42,12 +42,14 @@ in
       super.modemmanager # /org/gnome/shell/misc/modemManager.js
       super.libgudev # /org/gnome/gjs/modules/esm/gi.js
     ];
-    postFixup = old.postFixup + ''
-      wrapGApp $out/share/gnome-shell/org.gnome.Shell.SensorDaemon
-    '';
+    postFixup =
+      old.postFixup
+      + ''
+        wrapGApp $out/share/gnome-shell/org.gnome.Shell.SensorDaemon
+      '';
   });
 
-  gnome-settings-daemon = super.gnome-settings-daemon.overrideAttrs (old: rec {
+  gnome-settings-daemon-mobile = super.gnome-settings-daemon.overrideAttrs (old: rec {
     version = "48.mobile.0";
     src = super.fetchFromGitLab {
       domain = "gitlab.gnome.org";
@@ -56,24 +58,29 @@ in
       rev = version;
       hash = "sha256-gLYcjlQ0IcItktRkMEP9k/thYX9sWFzm5P2KF4CS1u8=";
     };
-    postPatch = old.postPatch + ''
-      rm -r subprojects/gvc
-      ln -sf ${gvc} subprojects/gvc
-    '';
+    postPatch =
+      old.postPatch
+      + ''
+        rm -r subprojects/gvc
+        ln -sf ${gvc} subprojects/gvc
+      '';
   });
 
-  mutter = super.mutter.overrideAttrs (old: rec {
-    version = "48.mobile.0";
-    src = super.fetchFromGitLab {
-      domain = "gitlab.gnome.org";
-      owner = "verdre";
-      repo = "mutter-mobile";
-      rev = version;
-      hash = "sha256-Qv2a9siPMHJ2dFTpYqDkaHML0jQ89RDpgDu6z6j9Xrc=";
-    };
-    postPatch = old.postPatch + ''
-      ln -sf ${gvdb} subprojects/gvdb
-    '';
-  });
+  mutter =
+    (super.mutter.override { gnome-settings-daemon = self.gnome-settings-daemon-mobile; }).overrideAttrs
+      (old: rec {
+        version = "48.mobile.0";
+        src = super.fetchFromGitLab {
+          domain = "gitlab.gnome.org";
+          owner = "verdre";
+          repo = "mutter-mobile";
+          rev = version;
+          hash = "sha256-Qv2a9siPMHJ2dFTpYqDkaHML0jQ89RDpgDu6z6j9Xrc=";
+        };
+        postPatch =
+          old.postPatch
+          + ''
+            ln -sf ${gvdb} subprojects/gvdb
+          '';
+      });
 }
-
