@@ -1,21 +1,23 @@
-self: super:
+final: prev:
 
 let
-  gvc = super.fetchFromGitLab {
+  inherit (prev) lib;
+
+  gvc = prev.fetchFromGitLab {
     domain = "gitlab.gnome.org";
     owner = "GNOME";
     repo = "libgnome-volume-control";
-    rev = "5f9768a2eac29c1ed56f1fbb449a77a3523683b6";
-    hash = "sha256-gdgTnxzH8BeYQAsvv++Yq/8wHi7ISk2LTBfU8hk12NM=";
+    rev = "0a4eda0cdc2deb352bebc70ec697c42af46094e4";
+    hash = "sha256-4s9S6m/rcroR38FSnLeWKZhnym4KROfibgRCjpGMKpY=";
   };
-  libshew = super.fetchFromGitLab {
+  libshew = prev.fetchFromGitLab {
     domain = "gitlab.gnome.org";
     owner = "GNOME";
     repo = "libshew";
-    rev = "ed782477cb5164320ae4f731d49bc5d475ab2a52";
-    hash = "sha256-auv5JsQUkytLLAAJzZlCDw4+v9/JfsCV1hKTa3Ku/Jg=";
+    rev = "d16afc40412b565d2bbecf80335f54a19a978009";
+    hash = "sha256-qjBnIoCX+mXWDHQ7XBP7PCAoK2loMrLdhdkmZGfPnCA=";
   };
-  gvdb = super.fetchFromGitLab {
+  gvdb = prev.fetchFromGitLab {
     domain = "gitlab.gnome.org";
     owner = "GNOME";
     repo = "gvdb";
@@ -26,18 +28,19 @@ in
 
 {
   gnome-shell =
-    (super.gnome-shell.override {
-      gnome-settings-daemon = self.gnome-settings-daemon-mobile;
-      mutter = self.mutter;
+    (prev.gnome-shell.override {
+      gnome-settings-daemon = final.gnome-settings-daemon-mobile;
+      mutter = final.mutter;
     }).overrideAttrs
-      (old: {
-        version = "49.mobile.0-unstable-2026-01-30";
-        src = super.fetchFromGitLab {
+      (old: rec {
+        version = "51.1.mobile.22";
+        src = prev.fetchFromGitLab {
           domain = "gitlab.gnome.org";
-          owner = "verdre";
+          group = "World";
+          owner = "MobileShell";
           repo = "gnome-shell-mobile";
-          rev = "f9e97c2f43827f22a1a3d7bbda8f8c7e88b450f9"; # mobile-shell-devel-49
-          hash = "sha256-XafMWhohuET+1S3At+I+wykqHaL7cM+bYYmTYt74hNs=";
+          tag = version;
+          hash = "sha256-Yak6Te73JS1dgm0CNGldp55bk3RBytCfIR+eOcMlnyc=";
           fetchSubmodules = true;
         };
         prePatch = ''
@@ -46,31 +49,44 @@ in
           cp -r ${gvc} subprojects/gvc
           chmod -R u+w subprojects/gvc
         '';
-        postPatch = ''
-          patchShebangs \
-            src/data-to-c.py \
-            build-aux/generate-app-list.py
 
-          # We can generate it ourselves.
-          rm -f man/gnome-shell.1
-        '';
+        # Extensions are no longer extracted with unzip in 51.1
+        patches = builtins.filter (
+          p: !(lib.hasSuffix "fix-paths.patch" (p.name or (baseNameOf p)))
+        ) old.patches;
+        postPatch =
+          lib.concatStringsSep "\n" (
+            builtins.filter (l: l != "rm data/theme/gnome-shell-{light,dark}.css") (
+              lib.splitString "\n" old.postPatch
+            )
+          )
+          + ''
+            substituteInPlace data/org.gnome.Shell-disable-extensions.service \
+              --replace-fail "ExecStart=gsettings" "ExecStart=${prev.glib.bin}/bin/gsettings"
+            substituteInPlace js/ui/extensionDownloader.js \
+              --replace-fail "'glib-compile-schemas'" "'${prev.glib.dev}/bin/glib-compile-schemas'"
+            substituteInPlace subprojects/extensions-tool/src/command-install.c \
+              --replace-fail '"glib-compile-schemas"' '"${prev.glib.dev}/bin/glib-compile-schemas"'
+          '';
+
         buildInputs = old.buildInputs ++ [
-          super.modemmanager # /org/gnome/shell/misc/modemManager.js
-          super.libgudev # /org/gnome/gjs/modules/esm/gi.js
+          prev.modemmanager # /org/gnome/shell/misc/modemManager.js
+          prev.libgudev # /org/gnome/gjs/modules/esm/gi.js
         ];
         postFixup = old.postFixup + ''
           wrapGApp $out/share/gnome-shell/org.gnome.Shell.SensorDaemon
         '';
       });
 
-  gnome-settings-daemon-mobile = super.gnome-settings-daemon.overrideAttrs (old: {
-    version = "49.mobile.0-unstable-2026-01-30";
-    src = super.fetchFromGitLab {
+  gnome-settings-daemon-mobile = prev.gnome-settings-daemon.overrideAttrs (old: rec {
+    version = "51.1.mobile.22";
+    src = prev.fetchFromGitLab {
       domain = "gitlab.gnome.org";
-      owner = "verdre";
+      group = "World";
+      owner = "MobileShell";
       repo = "gnome-settings-daemon-mobile";
-      rev = "11b4c4a7812a9ad6cca4796b715e6ec8b7c55c3e"; # gnome-49-mobile
-      hash = "sha256-Lv79Vx7D7eAVC8alWA8V1aBOmhgXf5mtvZgpPiqx3dk=";
+      tag = version;
+      hash = "sha256-wej8OmtLGg9etppGZjSUbCEsyxBFcGuc3SHblll3FCY=";
     };
     prePatch = ''
       rm -r subprojects/gvc
@@ -80,15 +96,16 @@ in
   });
 
   mutter =
-    (super.mutter.override { gnome-settings-daemon = self.gnome-settings-daemon-mobile; }).overrideAttrs
-      (old: {
-        version = "49.mobile.0-unstable-2026-01-30";
-        src = super.fetchFromGitLab {
+    (prev.mutter.override { gnome-settings-daemon = final.gnome-settings-daemon-mobile; }).overrideAttrs
+      (old: rec {
+        version = "51.1.mobile.22";
+        src = prev.fetchFromGitLab {
           domain = "gitlab.gnome.org";
-          owner = "verdre";
+          group = "World";
+          owner = "MobileShell";
           repo = "mutter-mobile";
-          rev = "3d1ac0577cb13baa11e8fe6ee4b192d4b26c7a7a"; # mobile-shell-devel-49
-          hash = "sha256-qVwH3/HhxcgyGAbWMYI7t2tJLSNLT9ktJZrwlMonAes=";
+          tag = version;
+          hash = "sha256-fcJLrOPHsNBxzk1Ur7uNOfP59hAzW+cWa4o9krlysYQ=";
         };
         postPatch = old.postPatch + ''
           ln -sf ${gvdb} subprojects/gvdb
