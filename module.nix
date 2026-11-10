@@ -1,12 +1,12 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   nixpkgs.overlays = [ (import ./overlay.nix) ];
 
   services.xserver.enable = true;
   services.xserver.videoDrivers = [ "modesetting" ];
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome = {
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome = {
     enable = true;
     # One app per workspace
     extraGSettingsOverrides = ''
@@ -16,19 +16,17 @@
     extraGSettingsOverridePackages = [ pkgs.mutter ];
   };
 
-  services.logind.powerKey = "ignore";
-  services.logind.powerKeyLongPress = "poweroff";
+  services.logind.settings.Login = {
+    HandlePowerKey = lib.mkDefault "ignore";
+    HandlePowerKeyLongPress = lib.mkDefault "poweroff";
+  };
 
   # Installed by default but not mobile friendly yet
   environment.gnome.excludePackages = with pkgs; [
-    totem # Videos
-    simple-scan # Document Scanner
     gnome-system-monitor
     yelp # Help
-    gnome-music
     baobab # Disk Usage Analyser
     evince # Document Viewer
-    gnome-connections
     gnome-tour
   ];
 
